@@ -1,6 +1,6 @@
 // src/App.jsx
 import { useState, useEffect } from 'react'
-import { supabase, fetchMarketVsOfficial, testConnection } from './supabaseClient'
+import { fetchMarketVsOfficial, testConnection } from './supabaseClient'
 import './App.css'
 
 function App() {
@@ -15,7 +15,6 @@ function App() {
       const result = await testConnection()
       setConnectionStatus(result)
     }
-    
     checkConnection()
   }, [])
 
@@ -24,17 +23,17 @@ function App() {
     async function loadData() {
       setLoading(true)
       const { data, error } = await fetchMarketVsOfficial()
-      
+
       if (error) {
         setError(`Error fetching data: ${error.message}`)
         setLoading(false)
         return
       }
-      
+
+      console.log('Fetched market_vs_official rows:', data) // ✅ debug
       setMarketData(data || [])
       setLoading(false)
     }
-    
     loadData()
   }, [])
 
@@ -60,7 +59,7 @@ function App() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Phase 5C: Data Pipeline Test</h1>
-      
+
       {/* Connection Status */}
       <div className="mb-6 p-4 border rounded">
         <h2 className="text-lg font-semibold mb-2">Connection Status:</h2>
@@ -69,14 +68,16 @@ function App() {
         ) : connectionStatus.connected ? (
           <p className="text-green-600">✅ Connected to Supabase successfully!</p>
         ) : (
-          <p className="text-red-600">❌ Connection failed: {connectionStatus.error?.message || 'Unknown error'}</p>
+          <p className="text-red-600">
+            ❌ Connection failed: {connectionStatus.error?.message || 'Unknown error'}
+          </p>
         )}
       </div>
-      
+
       {/* Data Display */}
       <div className="mb-6">
         <h2 className="text-lg font-semibold mb-2">Market vs Official Data (5 rows):</h2>
-        
+
         {loading ? (
           <p>Loading data...</p>
         ) : error ? (
@@ -99,14 +100,19 @@ function App() {
               </thead>
               <tbody>
                 {marketData.map((row, index) => (
-                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                  <tr
+                    key={index}
+                    className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
+                  >
                     <td className="py-2 px-4 border">{row.district || 'N/A'}</td>
                     <td className="py-2 px-4 border">{formatDate(row.market_month)}</td>
                     <td className="py-2 px-4 border">{formatDate(row.nso_month)}</td>
                     <td className="py-2 px-4 border">{formatCurrency(row.market_median)}</td>
                     <td className="py-2 px-4 border">{formatCurrency(row.nso_avg)}</td>
                     <td className="py-2 px-4 border">
-                      {row.price_gap_percent !== null ? `${row.price_gap_percent}%` : 'N/A'}
+                      {row.price_gap_percent !== null
+                        ? `${row.price_gap_percent}%`
+                        : 'N/A'}
                     </td>
                     <td className="py-2 px-4 border">{row.listing_count || 'N/A'}</td>
                   </tr>
@@ -116,7 +122,7 @@ function App() {
           </div>
         )}
       </div>
-      
+
       {/* Raw Data for Debugging */}
       <div className="mt-8">
         <h3 className="text-md font-semibold mb-2">Raw Data (for debugging):</h3>
